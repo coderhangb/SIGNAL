@@ -1,6 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
-@import 'tailwindcss';
-@import 'tw-animate-css';
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap");
+@import "tailwindcss";
+@import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -47,9 +47,9 @@
   --accent-foreground: 192 38% 16%;
   --destructive: 4 63% 43%;
   --destructive-foreground: 44 40% 97%;
-  --app-font-sans: 'DM Sans', sans-serif;
-  --app-font-serif: 'Space Grotesk', sans-serif;
-  --app-font-mono: 'Space Grotesk', monospace;
+  --app-font-sans: "DM Sans", sans-serif;
+  --app-font-serif: "Space Grotesk", sans-serif;
+  --app-font-mono: "Space Grotesk", monospace;
   --radius: 1rem;
   --sidebar: 190 39% 19%;
   --sidebar-foreground: 43 36% 95%;
@@ -76,36 +76,95 @@
 }
 
 @layer base {
-  * { @apply border-border; }
-  html { scroll-behavior: smooth; }
+  * {
+    @apply border-border;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
   body {
     @apply font-sans antialiased bg-background text-foreground;
     font-size: 18px;
     line-height: 1.55;
   }
-  button, input, textarea, select { font: inherit; }
-  button, a, input, textarea, select { outline-color: hsl(var(--ring)); outline-offset: 3px; }
-  ::selection { background: hsl(var(--accent) / .38); }
+  button,
+  input,
+  textarea,
+  select {
+    font: inherit;
+  }
+  button,
+  a,
+  input,
+  textarea,
+  select {
+    outline-color: hsl(var(--ring));
+    outline-offset: 3px;
+  }
+  ::selection {
+    background: hsl(var(--accent) / 0.38);
+  }
 }
 
 .signal-shell {
   min-height: 100dvh;
   background:
-    radial-gradient(circle at 10% 0%, hsl(174 58% 30% / .12), transparent 30rem),
-    radial-gradient(circle at 90% 12%, hsl(31 88% 57% / .14), transparent 24rem),
+    radial-gradient(
+      circle at 10% 0%,
+      hsl(174 58% 30% / 0.12),
+      transparent 30rem
+    ),
+    radial-gradient(
+      circle at 90% 12%,
+      hsl(31 88% 57% / 0.14),
+      transparent 24rem
+    ),
     hsl(var(--background));
 }
 .signal-grid {
-  background-image: linear-gradient(hsl(var(--foreground) / .035) 1px, transparent 1px),
-    linear-gradient(90deg, hsl(var(--foreground) / .035) 1px, transparent 1px);
+  background-image:
+    linear-gradient(hsl(var(--foreground) / 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(var(--foreground) / 0.035) 1px, transparent 1px);
   background-size: 32px 32px;
 }
-.display { font-family: var(--app-font-serif); letter-spacing: -.045em; }
-.eyebrow { letter-spacing: .12em; text-transform: uppercase; font-size: .74rem; font-weight: 700; }
-.card-surface { background: hsl(var(--card) / .92); border: 1px solid hsl(var(--border)); box-shadow: 0 14px 35px hsl(192 38% 16% / .07); }
-.focus-ring:focus-visible { box-shadow: 0 0 0 4px hsl(var(--accent) / .42); }
-.step-appear { animation: step-in .28s ease-out both; }
-@keyframes step-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.display {
+  font-family: var(--app-font-serif);
+  letter-spacing: -0.045em;
+}
+.eyebrow {
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+.card-surface {
+  background: hsl(var(--card) / 0.92);
+  border: 1px solid hsl(var(--border));
+  box-shadow: 0 14px 35px hsl(192 38% 16% / 0.07);
+}
+.focus-ring:focus-visible {
+  box-shadow: 0 0 0 4px hsl(var(--accent) / 0.42);
+}
+.step-appear {
+  animation: step-in 0.28s ease-out both;
+}
+@keyframes step-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
 }

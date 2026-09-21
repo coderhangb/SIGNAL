@@ -11,7 +11,11 @@ app.use(
     logger,
     serializers: {
       req(request) {
-        return { id: request.id, method: request.method, url: request.url?.split("?")[0] };
+        return {
+          id: request.id,
+          method: request.method,
+          url: request.url?.split("?")[0],
+        };
       },
       res(response) {
         return { statusCode: response.statusCode };
