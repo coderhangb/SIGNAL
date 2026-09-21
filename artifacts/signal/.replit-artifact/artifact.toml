@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "SIGNAL"
+description = "An accessible interview communication planning prototype for deaf and hard-of-hearing candidates. Guides candidates through communication preferences, invitation review, access gaps, support requests, and a simulated employer confirmation plan."
+version = "1.0.0"
+id = "artifacts/signal"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 18239
+
+[services.development]
+run = "npm run dev --workspace=@workspace/signal"
+
+[services.production]
+build = [ "npm", "run", "build", "--workspace=@workspace/signal" ]
+serve = "static"
+publicDir = "artifacts/signal/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "18239"
+BASE_PATH = "/"

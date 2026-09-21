@@ -1,0 +1,20 @@
+{
+  "name": "workspace",
+  "version": "0.0.0",
+  "license": "MIT",
+  "workspaces": [
+    "artifacts/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=@workspace/signal",
+    "build": "npm run build --workspace=@workspace/api-server && npm run build --workspace=@workspace/signal",
+    "preview": "npm run preview --workspace=@workspace/signal"
+  },
+  "private": true,
+  "dependencies": {
+    "@replit/connectors-sdk": "^0.4.3"
+  },
+  "devDependencies": {
+    "prettier": "^3.9.6"
+  }
+}

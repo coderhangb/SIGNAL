@@ -1,0 +1,88 @@
+You are a senior frontend engineer.
+
+I want you to migrate the entire SIGNAL – Communication Platform project to:
+
+TECH STACK:
+- React.js
+- JavaScript (NOT TypeScript)
+- Vite
+- npm (NOT pnpm)
+- HTML5
+- CSS3
+- React Hooks
+- React Router (if routing is needed)
+
+MAIN OBJECTIVE:
+Convert the entire existing project to React + JavaScript
+using npm, while preserving the current UI, features,
+design, and user experience.
+
+IMPORTANT REQUIREMENTS:
+
+1. COMPLETE MIGRATION
+- Inspect the entire existing codebase first.
+- Identify all frontend and backend components.
+- Convert all TypeScript files (.ts, .tsx) to JavaScript (.js, .jsx).
+- Remove TypeScript-specific syntax, types, and configurations.
+- Replace pnpm with npm.
+- Remove unnecessary TypeScript and pnpm configuration files.
+- Do not leave the project partially migrated.
+
+2. FRONTEND
+- Use React.js with JavaScript.
+- Use Vite as the frontend build tool.
+- Use functional components and React Hooks.
+- Organize components into a clean and maintainable structure.
+- Use CSS or existing styling solutions where appropriate.
+- Do not introduce TypeScript.
+
+3. PRESERVE EXISTING FEATURES
+- Preserve the current SIGNAL communication profile flow.
+- Preserve Vietnamese Sign Language selection.
+- Preserve written text communication.
+- Preserve live captions UI.
+- Preserve interpreter option UI.
+- Preserve accessibility-focused design.
+- Preserve responsive layouts.
+- Preserve existing functionality wherever possible.
+
+4. BACKEND AND DATA
+- Inspect the existing backend architecture.
+- If a backend exists, preserve its functionality.
+- If the current backend depends on Replit-specific services,
+  clearly document those dependencies.
+- Do not replace working backend features unnecessarily.
+
+5. NPM CONFIGURATION
+- Create a correct package.json for the migrated project.
+- Use npm scripts:
+  npm run dev
+  npm run build
+  npm run preview
+- Ensure npm install works successfully.
+- Do not use pnpm commands or pnpm lockfiles.
+
+6. CODE QUALITY
+- Use clear folder organization.
+- Use reusable React components.
+- Avoid unnecessary dependencies.
+- Ensure the project builds without errors.
+- Check for broken imports and missing files.
+
+7. BEFORE MODIFYING
+- First inspect the existing project structure.
+- Identify the current framework and architecture.
+- Create a migration plan.
+- Then execute the migration.
+
+8. FINAL VERIFICATION
+- Run npm install.
+- Run npm run build.
+- Fix all build errors.
+- Verify that the application works correctly.
+- Explain the final project structure and how to run it.
+
+IMPORTANT:
+Do not just create a new demo project.
+Migrate the existing SIGNAL project and preserve
+its current design and functionality.
