@@ -1,47 +1,13 @@
-# SIGNAL
+# SIGNAL developer context
 
-SIGNAL helps deaf and hard-of-hearing candidates prepare clear interview communication plans.
+Use README.md, CODE_PLAN.md, IMPLEMENTATION_STATUS.md and TEST_REPORT.md as the current references.
 
-## Run & Operate
-
-- `npm run dev` — run the SIGNAL frontend
-- `npm run preview` — preview the production frontend build
-- `npm run build` — build the frontend and API workspaces
-- `npm run dev --workspace=@workspace/api-server` — run the API server
-- API health check: `/api/healthz`
-
-## Stack
-
-- npm workspaces, Node.js 24, JavaScript, Vite
-- UI: React, React Hooks, Tailwind CSS
-- API: Express 5, bundled with esbuild
-- Logging: Pino
-
-## Where things live
-
-- `artifacts/signal/src/App.jsx` — complete SIGNAL planning flow
-- `artifacts/signal/src/index.css` — SIGNAL theme and responsive styling
-- `artifacts/api-server/src/routes/signal.js` — invitation analysis, access check, and request drafting
-- `lib/api-spec/openapi.yaml` — API contract reference
-
-## Architecture decisions
-
-- The frontend uses a local JavaScript API client so it can run with npm without generated TypeScript hooks.
-- The backend keeps the existing three SIGNAL endpoint contracts and returns demo-safe fallback content from the frontend when a service is unavailable.
-- The API is still served under `/api` so the frontend and published artifact keep the same routing.
-
-## Product
-
-SIGNAL guides candidates through communication preferences, invitation review, access gaps, editable support requests, and a simulated employer confirmation plan. It includes Vietnamese Sign Language, written communication, live captions, interpreter support, written questions, and text-chat backup options.
-
-## User preferences
-
-The SIGNAL migration uses JavaScript and npm while preserving the existing accessible flow and visual language.
-
-## Gotchas
-
-- Run the API workspace when testing real invitation analysis; the UI retains editable demo data if the API is unavailable.
-
-## Pointers
-
-- See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details
+- JavaScript, React 19, Vite 7, Express 5 and npm workspaces remain the runtime stack.
+- Active endpoints are /api/v2. The original /api/signal handlers are unmounted historical code.
+- API failures never substitute demo data. Rules/manual/template and AI-assisted modes are labelled separately.
+- PostgreSQL is required for real sessions, plans and HR sharing. PGlite is used only by test harnesses.
+- The test API serves synthetic data locally on 4173; it is not a production fallback.
+- No email delivery or public deployment occurs automatically.
+- npm ci, npm run dev:api, npm run dev; configuration and full test commands are in README.md.
+- lib/* generated TypeScript packages remain outside npm runtime workspaces. Do not turn on pnpm/catalog generation implicitly.
+- No migration runs in post-merge hooks. Run npm run db:migrate explicitly against a development DB.

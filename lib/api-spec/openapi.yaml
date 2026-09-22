@@ -1,216 +1,1476 @@
-openapi: 3.1.0
-info:
-  # Do not change the title, if the title changes, the import paths will be broken
-  title: Api
-  version: 0.1.0
-  description: API specification
-servers:
-  - url: /api
-    description: Base API path
-tags:
-  - name: health
-    description: Health operations
-  - name: signal
-    description: SIGNAL interview communication planning
-paths:
-  /healthz:
-    get:
-      operationId: healthCheck
-      tags: [health]
-      summary: Health check
-      description: Returns server health status
-      responses:
-        "200":
-          description: Healthy
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/HealthStatus"
-  /signal/analyze-invitation:
-    post:
-      operationId: analyzeInvitation
-      tags: [signal]
-      summary: Analyze an interview invitation
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/InvitationInput"
-      responses:
-        "200":
-          description: Extracted interview details and mentioned support
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/InvitationAnalysis"
-        "400":
-          description: Invalid invitation text
-  /signal/access-check:
-    post:
-      operationId: checkAccess
-      tags: [signal]
-      summary: Compare candidate preferences with invitation support
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/AccessCheckInput"
-      responses:
-        "200":
-          description: Communication access requirements and their statuses
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/AccessCheckResult"
-        "400":
-          description: Invalid access check input
-  /signal/accommodation-request:
-    post:
-      operationId: generateAccommodationRequest
-      tags: [signal]
-      summary: Generate an editable communication support request
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/AccommodationRequestInput"
-      responses:
-        "200":
-          description: Draft request email with responsible AI notice
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/AccommodationRequest"
-        "400":
-          description: Invalid request input
-components:
-  schemas:
-    HealthStatus:
-      type: object
-      properties:
-        status:
-          type: string
-      required:
-        - status
-    InterviewDetails:
-      type: object
-      properties:
-        company:
-          type: ["string", "null"]
-        position:
-          type: ["string", "null"]
-        date:
-          type: ["string", "null"]
-        time:
-          type: ["string", "null"]
-        format:
-          type: ["string", "null"]
-        platform:
-          type: ["string", "null"]
-        duration:
-          type: ["string", "null"]
-      required: [company, position, date, time, format, platform, duration]
-    MentionedSupport:
-      type: object
-      properties:
-        live_captions:
-          type: boolean
-        vsl_interpreter:
-          type: boolean
-        written_questions:
-          type: boolean
-        text_chat_backup:
-          type: boolean
-      required: [live_captions, vsl_interpreter, written_questions, text_chat_backup]
-    InvitationInput:
-      type: object
-      properties:
-        text:
-          type: string
-          minLength: 1
-      required: [text]
-    InvitationAnalysis:
-      type: object
-      properties:
-        interview:
-          $ref: "#/components/schemas/InterviewDetails"
-        mentioned_support:
-          $ref: "#/components/schemas/MentionedSupport"
-        ai_notice:
-          type: string
-        requires_user_review:
-          type: boolean
-      required: [interview, mentioned_support, ai_notice, requires_user_review]
-    CandidateProfile:
-      type: object
-      properties:
-        preferences:
-          type: array
-          items:
-            type: string
-      required: [preferences]
-    AccessCheckInput:
-      type: object
-      properties:
-        profile:
-          $ref: "#/components/schemas/CandidateProfile"
-        interview:
-          $ref: "#/components/schemas/InterviewDetails"
-        mentioned_support:
-          $ref: "#/components/schemas/MentionedSupport"
-      required: [profile, interview, mentioned_support]
-    AccessRequirement:
-      type: object
-      properties:
-        name:
-          type: string
-        key:
-          type: string
-        status:
-          type: string
-          enum: [confirmed, needs_confirmation, unknown, not_available]
-        reason:
-          type: string
-        recommended_action:
-          type: string
-      required: [name, key, status, reason, recommended_action]
-    AccessCheckResult:
-      type: object
-      properties:
-        requirements:
-          type: array
-          items:
-            $ref: "#/components/schemas/AccessRequirement"
-        ai_notice:
-          type: string
-        requires_user_review:
-          type: boolean
-      required: [requirements, ai_notice, requires_user_review]
-    AccommodationRequestInput:
-      type: object
-      properties:
-        profile:
-          $ref: "#/components/schemas/CandidateProfile"
-        interview:
-          $ref: "#/components/schemas/InterviewDetails"
-        requirements:
-          type: array
-          items:
-            $ref: "#/components/schemas/AccessRequirement"
-      required: [profile, interview, requirements]
-    AccommodationRequest:
-      type: object
-      properties:
-        subject:
-          type: string
-        body:
-          type: string
-        ai_notice:
-          type: string
-        requires_user_review:
-          type: boolean
-      required: [subject, body, ai_notice, requires_user_review]
-
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Api",
+    "version": "2.0.0",
+    "description": "SIGNAL v2. Legacy /signal routes retired. PostgreSQL is required for persistent sessions/plans/sharing. All mutations require APP_ORIGIN; cookie-authenticated mutations also require CSRF. Generated lib clients are not runtime dependencies."
+  },
+  "servers": [
+    {
+      "url": "/api"
+    }
+  ],
+  "paths": {
+    "/healthz": {
+      "get": {
+        "summary": "Health and configured persistence status",
+        "operationId": "get__healthz",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Safe error; 400,401,403,404,409,410,413,422,429,503,504",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/catalog": {
+      "get": {
+        "summary": "Stable bilingual catalog",
+        "operationId": "get__v2_catalog",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Safe error; 400,401,403,404,409,410,413,422,429,503,504",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/session": {
+      "post": {
+        "summary": "Create/reuse anonymous candidate cookie",
+        "operationId": "post__v2_session",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Safe error; 400,401,403,404,409,410,413,422,429,503,504",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {},
+                "required": []
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Origin",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Must exactly match APP_ORIGIN."
+          }
+        ]
+      },
+      "get": {
+        "summary": "Restore existing candidate CSRF",
+        "operationId": "get__v2_session",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Safe error; 400,401,403,404,409,410,413,422,429,503,504",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "candidateCookie": []
+          }
+        ]
+      }
+    },
+    "/v2/analyze-invitation": {
+      "post": {
+        "summary": "Analyze with explicit rules/AI mode; AI requires separate consent",
+        "operationId": "post__v2_analyze_invitation",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Safe error; 400,401,403,404,409,410,413,422,429,503,504",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnalyzeInput"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Origin",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Must exactly match APP_ORIGIN."
+          }
+        ]
+      }
+    },
+    "/v2/access-check": {
+      "post": {
+        "summary": "Preview selected requirements from server extraction ticket",
+        "operationId": "post__v2_access_check",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Safe error; 400,401,403,404,409,410,413,422,429,503,504",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PreviewInput"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Origin",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Must exactly match APP_ORIGIN."
+          }
+        ]
+      }
+    },
+    "/v2/accommodation-request": {
+      "post": {
+        "summary": "Editable selected-only template, never sent",
+        "operationId": "post__v2_accommodation_request",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Safe error; 400,401,403,404,409,410,413,422,429,503,504",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PreviewInput"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Origin",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Must exactly match APP_ORIGIN."
+          }
+        ]
+      }
+    },
+    "/v2/plans": {
+      "post": {
+        "summary": "Persist server-verified snapshot; reject client ownership/evidence claims",
+        "operationId": "post__v2_plans",
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Safe error; 400,401,403,404,409,410,413,422,429,503,504",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "snapshot": {
+                    "$ref": "#/components/schemas/Snapshot"
+                  },
+                  "idempotencyKey": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "snapshot",
+                  "idempotencyKey"
+                ]
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "candidateCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Origin",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Must exactly match APP_ORIGIN."
+          }
+        ]
+      }
+    },
+    "/v2/plans/{id}": {
+      "get": {
+        "summary": "Owner-only current snapshot and responses",
+        "operationId": "get__v2_plans__id_",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Safe error; 400,401,403,404,409,410,413,422,429,503,504",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "security": [
+          {
+            "candidateCookie": []
+          }
+        ]
+      },
+      "patch": {
+        "summary": "Atomic new revision, revoke all old grants, invalidate approval",
+        "operationId": "patch__v2_plans__id_",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Safe error; 400,401,403,404,409,410,413,422,429,503,504",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "expectedRevision": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "changes": {
+                    "$ref": "#/components/schemas/Snapshot"
+                  },
+                  "confirmNeedsChange": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "expectedRevision",
+                  "changes"
+                ]
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Origin",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Must exactly match APP_ORIGIN."
+          }
+        ],
+        "security": [
+          {
+            "candidateCookie": []
+          }
+        ]
+      },
+      "delete": {
+        "summary": "Delete owned plan and cascade all dependent private data",
+        "operationId": "delete__v2_plans__id_",
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "default": {
+            "description": "Safe error; 400,401,403,404,409,410,413,422,429,503,504",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "expectedRevision": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "expectedRevision"
+                ]
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Origin",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Must exactly match APP_ORIGIN."
+          }
+        ],
+        "security": [
+          {
+            "candidateCookie": []
+          }
+        ]
+      }
+    },
+    "/v2/plans/{id}/share": {
+      "post": {
+        "summary": "Persist consented immutable projection; return fragment bearer link",
+        "operationId": "post__v2_plans__id__share",
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Safe error; 400,401,403,404,409,410,413,422,429,503,504",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "expectedRevision": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "sharedFields": {
+                    "type": "array",
+                    "items": {
+                      "enum": [
+                        "supports",
+                        "interview",
+                        "draft",
+                        "communicationMethods",
+                        "invitation"
+                      ]
+                    }
+                  },
+                  "consentAccepted": {
+                    "const": true
+                  }
+                },
+                "required": [
+                  "expectedRevision",
+                  "sharedFields",
+                  "consentAccepted"
+                ]
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Origin",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Must exactly match APP_ORIGIN."
+          }
+        ],
+        "security": [
+          {
+            "candidateCookie": []
+          }
+        ]
+      }
+    },
+    "/v2/plans/{id}/revoke-share": {
+      "post": {
+        "summary": "Invalidate grant and all scoped HR sessions",
+        "operationId": "post__v2_plans__id__revoke_share",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Safe error; 400,401,403,404,409,410,413,422,429,503,504",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "expectedRevision": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "grantId": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "expectedRevision",
+                  "grantId"
+                ]
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Origin",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Must exactly match APP_ORIGIN."
+          }
+        ],
+        "security": [
+          {
+            "candidateCookie": []
+          }
+        ]
+      }
+    },
+    "/v2/plans/{id}/approve": {
+      "post": {
+        "summary": "Candidate review; server computes readiness",
+        "operationId": "post__v2_plans__id__approve",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Safe error; 400,401,403,404,409,410,413,422,429,503,504",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "expectedRevision": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "responseRevision": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "reviewed": {
+                    "const": true
+                  },
+                  "decisions": {
+                    "$ref": "#/components/schemas/Decisions"
+                  }
+                },
+                "required": [
+                  "expectedRevision",
+                  "responseRevision",
+                  "reviewed",
+                  "decisions"
+                ]
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Origin",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Must exactly match APP_ORIGIN."
+          }
+        ],
+        "security": [
+          {
+            "candidateCookie": []
+          }
+        ]
+      }
+    },
+    "/v2/plans/{id}/export": {
+      "get": {
+        "summary": "Current plan including source, outstanding items and alternatives",
+        "operationId": "get__v2_plans__id__export",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Safe error; 400,401,403,404,409,410,413,422,429,503,504",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "security": [
+          {
+            "candidateCookie": []
+          }
+        ]
+      }
+    },
+    "/v2/hr/exchange": {
+      "post": {
+        "summary": "Exchange fragment token for HttpOnly scoped HR cookie",
+        "operationId": "post__v2_hr_exchange",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Safe error; 400,401,403,404,409,410,413,422,429,503,504",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "token": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "token"
+                ]
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Origin",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Must exactly match APP_ORIGIN."
+          }
+        ]
+      }
+    },
+    "/v2/hr/plan": {
+      "get": {
+        "summary": "Only explicitly shared projection; no unshared invitation/profile",
+        "operationId": "get__v2_hr_plan",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Safe error; 400,401,403,404,409,410,413,422,429,503,504",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "hrCookie": []
+          }
+        ]
+      }
+    },
+    "/v2/hr/response": {
+      "post": {
+        "summary": "Atomic response history; invalidate prior candidate approval",
+        "operationId": "post__v2_hr_response",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Safe error; 400,401,403,404,409,410,413,422,429,503,504",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "expectedResponseRevision": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "answers": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/HrAnswer"
+                    }
+                  },
+                  "responderLabel": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  }
+                },
+                "required": [
+                  "expectedResponseRevision",
+                  "answers",
+                  "responderLabel"
+                ]
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "hrCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Origin",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Must exactly match APP_ORIGIN."
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "candidateCookie": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "candidate"
+      },
+      "hrCookie": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "hr"
+      }
+    },
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "error": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              },
+              "retryable": {
+                "type": "boolean"
+              },
+              "requestId": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "message",
+              "retryable",
+              "requestId"
+            ]
+          }
+        },
+        "required": [
+          "error"
+        ]
+      },
+      "Support": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "type": "string",
+            "enum": [
+              "live_captions",
+              "vsl_interpreter",
+              "written_responses",
+              "written_questions_during",
+              "questions_in_advance",
+              "agenda_in_advance",
+              "text_chat_backup",
+              "extra_clarification_time",
+              "clear_turn_taking"
+            ]
+          },
+          "importance": {
+            "enum": [
+              "essential",
+              "preferred"
+            ]
+          }
+        },
+        "required": [
+          "key",
+          "importance"
+        ]
+      },
+      "Profile": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "communicationMethods": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "vsl",
+                "text",
+                "speech",
+                "mixed"
+              ]
+            }
+          },
+          "supports": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Support"
+            }
+          },
+          "shareCommunicationMethods": {
+            "type": "boolean"
+          },
+          "interpreterArrangement": {
+            "enum": [
+              "hr",
+              "self",
+              "record_only"
+            ]
+          },
+          "interpreterNotes": {
+            "type": "string",
+            "maxLength": 2000
+          }
+        },
+        "required": [
+          "communicationMethods",
+          "supports",
+          "shareCommunicationMethods"
+        ]
+      },
+      "Interview": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "company": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "position": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "date": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "time": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "timezone": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "format": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "platform": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "locationOrLink": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "durationMinutes": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "company",
+          "position",
+          "date",
+          "time",
+          "timezone",
+          "format",
+          "platform",
+          "locationOrLink",
+          "durationMinutes"
+        ]
+      },
+      "ManualObservation": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "confirmed",
+              "needs_confirmation",
+              "unknown",
+              "not_available"
+            ]
+          },
+          "details": {
+            "type": "string",
+            "maxLength": 2000
+          }
+        },
+        "required": [
+          "key",
+          "status",
+          "details"
+        ]
+      },
+      "Draft": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "subject": {
+            "type": "string",
+            "maxLength": 300
+          },
+          "body": {
+            "type": "string",
+            "maxLength": 10000
+          },
+          "mode": {
+            "type": "string"
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "subject",
+          "body"
+        ]
+      },
+      "Snapshot": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "profile": {
+            "$ref": "#/components/schemas/Profile"
+          },
+          "invitation": {
+            "type": "string",
+            "maxLength": 20000
+          },
+          "analysisId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "mode": {
+            "enum": [
+              "rules",
+              "ai",
+              "manual"
+            ]
+          },
+          "interview": {
+            "$ref": "#/components/schemas/Interview"
+          },
+          "draft": {
+            "$ref": "#/components/schemas/Draft"
+          },
+          "manualObservations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ManualObservation"
+            }
+          }
+        },
+        "required": [
+          "profile",
+          "invitation",
+          "mode",
+          "interview",
+          "draft"
+        ]
+      },
+      "AnalyzeInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 20000
+          },
+          "locale": {
+            "type": "string"
+          },
+          "inputRevision": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "mode": {
+            "enum": [
+              "rules",
+              "ai"
+            ]
+          },
+          "aiConsent": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "text",
+          "inputRevision"
+        ]
+      },
+      "PreviewInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "profile": {
+            "$ref": "#/components/schemas/Profile"
+          },
+          "analysisId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "reviewedDetails": {
+            "$ref": "#/components/schemas/Interview"
+          },
+          "manualObservations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ManualObservation"
+            }
+          }
+        },
+        "required": [
+          "profile",
+          "reviewedDetails"
+        ]
+      },
+      "HrAnswer": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "confirmed",
+              "needs_confirmation",
+              "not_available"
+            ]
+          },
+          "details": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "alternativeProposal": {
+            "type": "string",
+            "maxLength": 2000
+          }
+        },
+        "required": [
+          "key",
+          "status",
+          "details"
+        ]
+      },
+      "Decisions": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "acceptedAlternatives": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "acknowledgedPreferred": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "acceptedAlternatives",
+          "acknowledgedPreferred"
+        ]
+      }
+    }
+  }
+}

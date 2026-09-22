@@ -8,13 +8,34 @@
   "scripts": {
     "dev": "npm run dev --workspace=@workspace/signal",
     "build": "npm run build --workspace=@workspace/api-server && npm run build --workspace=@workspace/signal",
-    "preview": "npm run preview --workspace=@workspace/signal"
+    "preview": "npm run preview --workspace=@workspace/signal",
+    "dev:api": "node --env-file-if-exists=.env artifacts/api-server/src/index.js",
+    "db:migrate": "node --env-file-if-exists=.env scripts/migrate.mjs",
+    "test:e2e": "node scripts/run-e2e.mjs",
+    "test:unit": "node --test artifacts/api-server/tests/unit/*.test.js artifacts/signal/tests/*.test.js",
+    "test:ai-live": "node --env-file-if-exists=.env scripts/ai-live.mjs",
+    "lint": "node scripts/lint.mjs",
+    "start": "node --env-file-if-exists=.env artifacts/api-server/dist/index.mjs",
+    "test": "npm run test:unit && npm run test:integration",
+    "test:integration": "node --test artifacts/api-server/tests/integration/*.test.js",
+    "check:syntax": "node scripts/check-syntax.mjs",
+    "test:runtime": "node --test tests/runtime.test.mjs"
   },
   "private": true,
   "dependencies": {
     "@replit/connectors-sdk": "^0.4.3"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "0.5.8",
+    "@playwright/test": "1.63.0",
+    "embedded-postgres": "18.4.0-beta.17",
+    "eslint": "9.39.5",
+    "eslint-plugin-react": "7.37.5",
+    "globals": "17.12.0",
     "prettier": "^3.9.6"
-  }
+  },
+  "overrides": {
+    "esbuild": "npm:esbuild-wasm@0.28.2"
+  },
+  "type": "module"
 }

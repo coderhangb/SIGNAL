@@ -49,3 +49,42 @@ Thumbs.db
 .local/
 
 .env
+# Local reports, private configuration, test databases
+.env.*
+!.env.example
+/test-results/
+/test-data/
+
+# GitHub handoff: generated output, local databases and sensitive recordings
+*.log
+*.log.*
+coverage/
+playwright-report/
+blob-report/
+test-results/
+test-data/
+pgdata/
+.pgdata/
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+*.sqlite-*
+*.dump
+*.backup
+*.pem
+*.key
+*.p12
+*.pfx
+.npmrc
+.netrc
+.pgpass
+pgpass.conf
+*.zip
+/evidence/
+/PACKAGING_VERIFICATION.json
+/attached_assets/
+/screenshots/
+# Keep the reproducible inputs and the secret-free template
+!package-lock.json
+!.env.example

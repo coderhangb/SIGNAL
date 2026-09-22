@@ -1,21 +1,42 @@
 import "dotenv/config";
-import app from "./app.js";
-import { logger } from "./lib/logger.js";
-
-const rawPort = process.env.PORT;
-if (!rawPort)
-  throw new Error(
-    "PORT environment variable is required but was not provided.",
-  );
-
-const port = Number(rawPort);
-if (Number.isNaN(port) || port <= 0)
-  throw new Error(`Invalid PORT value: "${rawPort}"`);
-
-app.listen(port, (error) => {
-  if (error) {
-    logger.error({ err: error }, "Error listening on port");
+import pg from "pg";
+import { createApp } from "./app.js";
+import { readConfig } from "./config/env.js";
+import { PlanRepository } from "./repositories/plan-repository.js";
+const config = readConfig();
+const pool = config.databaseUrl
+  ? new pg.Pool({
+      connectionString: config.databaseUrl,
+      connectionTimeoutMillis: 5000,
+    })
+  : null;
+if (pool) {
+  try {
+    const result = await pool.query(
+      "SELECT version FROM schema_migrations WHERE version=1",
+    );
+    if (!result.rows.length) throw new Error();
+  } catch {
+    console.error(
+      "Database unavailable or migration missing. Run npm run db:migrate with a development DATABASE_URL.",
+    );
+    await pool.end();
     process.exit(1);
   }
-  logger.info({ port }, "Server listening");
-});
+}
+const server = createApp({
+  config,
+  repo: new PlanRepository(pool),
+  log: (entry) => console.info(JSON.stringify(entry)),
+}).listen(config.port, "127.0.0.1", () =>
+  console.info(
+    `SIGNAL API on ${config.port}; persistence ${pool ? "PostgreSQL" : "unconfigured"}.`,
+  ),
+);
+for (const event of ["SIGINT", "SIGTERM"])
+  process.on(event, () =>
+    server.close(async () => {
+      await pool?.end();
+      process.exit(0);
+    }),
+  );

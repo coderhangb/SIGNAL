@@ -1,4 +1,4 @@
 #!/bin/bash
 set -e
-pnpm install --frozen-lockfile
-pnpm --filter db push
+npm ci
+# Migrations are explicit: configure a development DATABASE_URL and run npm run db:migrate.
